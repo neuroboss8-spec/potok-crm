@@ -1,0 +1,4 @@
+# Caddy runs on the same host as the Docker-published localhost port.
+crm.example.com {
+    reverse_proxy 127.0.0.1:8000
+}

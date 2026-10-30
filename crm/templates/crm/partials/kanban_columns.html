@@ -1,0 +1,27 @@
+{% load money tag_colors %}{% if action_notice %}<p class="board-action-feedback feedback-{{ action_notice_kind }}" role="status" aria-live="polite">{{ action_notice }}</p>{% endif %}
+<div class="kanban-board">
+{% for column in columns %}
+  <section class="kanban-column" data-kanban-column data-status="{{ column.value }}" aria-label="{{ column.label }}: {{ column.count }} заявок">
+    <header class="kanban-column-header"><h2>{{ column.label }}</h2><span class="kanban-column-count">{{ column.count }}</span></header>
+    <div class="kanban-column-summary"><span class="kanban-column-total"><span aria-hidden="true">Σ</span> Сумма сделок: <strong>{{ column.amount_total|rubles }}</strong></span><a class="kanban-add-deal" href="{% url 'lead_new' %}?stage={{ column.value }}&amp;return_to=%2Fboard%2F"><span aria-hidden="true">＋</span> Добавить сделку</a></div>
+    <div class="kanban-dropzone">
+    {% for lead in column.leads %}
+      <article class="kanban-card" draggable="true" data-kanban-card>
+        <a class="kanban-card-title" href="{% url 'lead_detail' lead.id %}?return_to=%2Fboard%2F">{{ lead.name }}</a>
+        <span class="kanban-card-contact">{{ lead.contact_value }}</span>
+        <div class="kanban-card-amount">{% if lead.deal_amount != None %}{{ lead.deal_amount|rubles }}{% else %}Сумма не указана{% endif %}</div>
+        <p class="kanban-card-request">{{ lead.request }}</p>
+        <div class="kanban-card-footer"><div class="kanban-card-tags" aria-label="Теги заявки">{% for tag in lead.tags.all %}<span class="tag-chip tag-color-{{ tag|tag_color }}">{{ tag.name }}</span>{% empty %}<span class="kanban-no-tags">Без тегов</span>{% endfor %}</div><time datetime="{{ lead.created_at|date:'c' }}">{{ lead.created_at|date:'d.m.Y' }}</time></div>
+        {% if lead.is_demo %}<span class="demo-row-label">Демо</span>{% endif %}
+        <form method="post" action="{% url 'lead_status' lead.id %}" hx-post="{% url 'lead_status' lead.id %}" hx-trigger="change" hx-target="#kanban-board" hx-swap="innerHTML" class="kanban-stage-form">
+          {% csrf_token %}<label class="sr-only" for="kanban-status-{{ lead.id }}">Изменить статус заявки {{ lead.name }}</label>
+          <select class="board-stage-select" id="kanban-status-{{ lead.id }}" name="status" aria-label="Переместить {{ lead.name }} на этап" title="Переместить на другой этап" data-saved-status="{{ lead.status }}">
+            {% for value,label in status_choices %}<option value="{{ value }}" {% if value == lead.status %}selected{% endif %}>Переместить: {{ label }}</option>{% endfor %}
+          </select>
+        </form>
+      </article>
+    {% empty %}<p class="kanban-empty">Перетащите заявку сюда</p>{% endfor %}
+    </div>
+  </section>
+{% endfor %}
+</div>

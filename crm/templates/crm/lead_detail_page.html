@@ -1,0 +1,1 @@
+{% extends 'crm/base.html' %}{% block title %}Заявка №{{ lead.id }}{% endblock %}{% block content %}<a class="back-link" href="{{ list_url }}">{{ list_label }}</a><div class="standalone-detail" id="selected-lead">{% include 'crm/partials/lead_detail.html' %}</div>{% endblock %}

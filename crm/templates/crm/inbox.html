@@ -1,0 +1,20 @@
+{% extends 'crm/base.html' %}
+{% block title %}Заявки{% endblock %}
+{% block content %}
+<section class="inbox-page" aria-labelledby="inbox-heading">
+  <header class="inbox-heading">
+    <div><p class="eyebrow">ВХОДЯЩИЕ ОБРАЩЕНИЯ</p><h1 id="inbox-heading">Заявки</h1></div>
+    <a class="button btn btn-primary button-primary add-lead-button" href="{{ manual_url }}"><span aria-hidden="true">＋</span>Добавить заявку</a>
+  </header>
+  <form id="filters-form" class="filter-bar card" role="search" method="get" action="{% url 'inbox' %}" hx-get="{% url 'inbox' %}" hx-target="#inbox-content" hx-swap="innerHTML" hx-trigger="change, input changed delay:350ms from:#search-input" hx-push-url="true" hx-sync="#inbox-content:replace">
+    <label class="search-control"><span class="search-symbol" aria-hidden="true">⌕</span><span class="sr-only">Поиск по заявкам</span><input id="search-input" name="q" value="{{ query }}" placeholder="Имя, контакт или запрос" autocomplete="off"></label>
+    <label class="filter-control"><span>Источник</span><select name="source"><option value="">Все источники</option>{% for value,label in source_choices %}<option value="{{ value }}" {% if selected_source == value %}selected{% endif %}>{% if value == 'bot' %}Telegram-бот{% elif value == 'telegram' %}Telegram-аккаунт{% else %}{{ label }}{% endif %}</option>{% endfor %}</select></label>
+    <label class="filter-control"><span>Тег</span><select name="tag"><option value="">Все теги</option>{% for tag in tags %}<option value="{{ tag.id }}" {% if selected_tag == tag.id|stringformat:'s' %}selected{% endif %}>{{ tag.name }}</option>{% endfor %}</select></label>
+    <input type="hidden" name="status" value="{{ selected_status }}">
+  </form>
+  <div id="inbox-content" class="inbox-content" hx-get="{{ list_url }}" hx-trigger="every 3s [document.visibilityState === 'visible' && !document.querySelector('.drawer-backdrop') && !document.querySelector('.tag-more[open]') && !document.querySelector('.inbox-content :focus') && !document.querySelector('.form-stack[data-dirty=true]')]" hx-target="this" hx-swap="innerHTML" hx-sync="this:replace">
+    {% include 'crm/partials/inbox_content.html' %}
+  </div>
+</section>
+<div id="drawer-host">{% if selected_lead %}{% include 'crm/partials/lead_drawer.html' %}{% endif %}</div>
+{% endblock %}

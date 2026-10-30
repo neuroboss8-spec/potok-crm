@@ -1,0 +1,11 @@
+{% extends 'crm/base.html' %}
+{% block title %}Воронка{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><p class="eyebrow">РАБОТА С ЛИДАМИ</p><h1>Воронка</h1><p class="page-subtitle">Перемещайте заявку на следующий этап перетаскиванием или через список статусов.</p></div>
+  <span class="board-summary">{{ total_count }} заявок</span>
+</header>
+<div class="kanban-scroll" id="kanban-board" aria-label="Канбан-доска заявок">
+  {% include 'crm/partials/kanban_columns.html' %}
+</div>
+{% endblock %}

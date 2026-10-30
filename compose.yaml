@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16.15-alpine3.23
+    environment:
+      POSTGRES_DB: ${PG_DATABASE:?Set PG_DATABASE in .env}
+      POSTGRES_USER: ${PG_USER:?Set PG_USER in .env}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?Set PG_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  web:
+    build: .
+    env_file: .env
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 1 --no-control-socket --access-logfile - --error-logfile -
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  bot:
+    build: .
+    env_file: .env
+    command: python manage.py run_bot
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

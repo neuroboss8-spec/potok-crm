@@ -1,0 +1,6 @@
+<div class="drawer-backdrop" data-drawer-backdrop>
+  <section class="drawer-panel" id="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="lead-title" tabindex="-1">
+    <header class="drawer-toolbar"><a class="drawer-open-separate" href="{% url 'lead_detail' selected_lead.id %}?return_to={{ selected_url|urlencode }}">Открыть отдельно <span aria-hidden="true">↗</span></a><button class="drawer-close" type="button" data-close-drawer hx-get="{{ list_url }}" hx-target="#drawer-host" hx-swap="innerHTML" hx-push-url="{{ list_url }}" aria-label="Закрыть карточку"><span aria-hidden="true">×</span><span class="mobile-back-label">К списку</span></button></header>
+    <div id="drawer-panel-content">{% include 'crm/partials/lead_detail.html' %}</div>
+  </section>
+</div>

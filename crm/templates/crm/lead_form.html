@@ -1,0 +1,17 @@
+{% extends 'crm/base.html' %}
+{% block title %}{% if is_new %}Новая заявка{% else %}Редактирование заявки{% endif %}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ return_to }}">← К заявкам</a>
+<section class="form-page" aria-labelledby="lead-form-heading"><p class="eyebrow">{% if is_new %}РУЧНОЕ ДОБАВЛЕНИЕ{% else %}ЗАЯВКА №{{ lead.id }}{% endif %}</p><h1 id="lead-form-heading">{% if is_new %}Новая заявка{% else %}Редактировать заявку{% endif %}</h1><p class="page-subtitle">Заполните контакт и запрос. Источник этой записи — вручную.</p>
+  <form method="post" action="{% if is_new %}{% url 'lead_new' %}{% else %}{% url 'lead_edit' lead.id %}{% endif %}" class="form-stack form-card card">
+    {% csrf_token %}{{ form.submission_id }}{% if is_new %}<div class="field"><label for="{{ form.initial_status.id_for_label }}">Этап воронки</label>{{ form.initial_status }}{% for error in form.initial_status.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% else %}{{ form.initial_status.as_hidden }}{% endif %}<input type="hidden" name="return_to" value="{{ return_to }}">
+    {% if form.non_field_errors %}<div class="form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="field"><label for="{{ form.name.id_for_label }}">Имя</label>{{ form.name }}{% for error in form.name.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>
+    <div class="field-row"><div class="field"><label for="{{ form.contact_type.id_for_label }}">Тип контакта</label>{{ form.contact_type }}{% for error in form.contact_type.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div><div class="field"><label for="{{ form.contact_value.id_for_label }}">Контакт</label>{{ form.contact_value }}{% for error in form.contact_value.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div></div>
+    <div class="field"><label for="{{ form.request.id_for_label }}">Запрос</label>{{ form.request }}<small class="field-hint">От 5 до 3000 символов</small>{% for error in form.request.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>
+    <div class="field"><label for="{{ form.deal_amount.id_for_label }}">Сумма сделки, ₽ <span class="optional-label">необязательно</span></label>{{ form.deal_amount }}<small class="field-hint">Можно указать предварительную сумму или оставить поле пустым.</small>{% for error in form.deal_amount.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>
+    {% if is_new %}<div class="field"><label for="{{ form.tags.id_for_label }}">Теги <span class="optional-label">необязательно</span></label>{{ form.tags }}<datalist id="known-tags">{% for tag in tag_choices %}<option value="{{ tag.name }}">{% endfor %}</datalist><small class="field-hint">{{ form.tags.help_text }}</small>{% for error in form.tags.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endif %}
+    <div class="form-actions"><a class="button btn button-quiet" href="{{ return_to }}">Отмена</a><button class="button btn btn-primary button-primary" type="submit">{% if is_new %}Сохранить заявку{% else %}Сохранить изменения{% endif %}</button></div>
+  </form>
+</section>
+{% endblock %}

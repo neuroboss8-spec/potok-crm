@@ -1,0 +1,35 @@
+{% load tag_colors %}
+<div class="results-bar" aria-live="polite" aria-atomic="true">
+  <p>{% if filters_active %}<strong>Найдено {{ leads.paginator.count }}</strong> из {{ counts.total }}{% else %}<strong>{{ counts.total }}</strong> заявок{% endif %}<span> · обновлено автоматически</span></p>
+  {% if active_filters %}<div class="active-filters" aria-label="Активные фильтры">{% for item in active_filters %}<a class="filter-chip" href="{{ item.url }}" hx-get="{{ item.url }}" hx-target="#inbox-content" hx-swap="innerHTML" hx-push-url="true">{{ item.label }} <span aria-hidden="true">×</span></a>{% endfor %}<a class="clear-filters" href="{{ all_url }}" hx-get="{{ all_url }}" hx-target="#inbox-content" hx-swap="innerHTML" hx-push-url="true">Сбросить всё</a></div>{% endif %}
+</div>
+{% if leads.object_list %}
+<div class="table-frame card">
+  <table class="leads-table">
+    <thead><tr><th scope="col" class="col-client">Клиент</th><th scope="col" class="col-request">Запрос</th><th scope="col" class="col-tags">Теги</th><th scope="col" class="col-source">Источник</th><th scope="col" class="col-status">Статус</th><th scope="col" class="col-created">Создана</th></tr></thead>
+    <tbody>
+    {% for lead in leads %}
+      <tr class="lead-row {% if selected_id == lead.id|stringformat:'s' %}selected{% endif %}">
+        <td class="client-cell"><a class="client-link" href="{{ lead.open_url }}" hx-get="{{ lead.open_url }}" hx-target="#drawer-host" hx-swap="innerHTML" hx-push-url="true" aria-haspopup="dialog"><strong>{{ lead.name }}</strong><small>{{ lead.contact_value }}</small><span>№{{ lead.id }}</span></a></td>
+        <td class="request-cell"><span title="{{ lead.request }}">{{ lead.request }}</span></td>
+        <td class="tags-cell"><div class="row-tags">{% for tag in lead.tags.all %}{% if forloop.counter <= 2 %}<a class="tag-chip tag-color-{{ tag|tag_color }}" href="{{ tag.filter_url }}" hx-get="{{ tag.filter_url }}" hx-target="#inbox-content" hx-swap="innerHTML" hx-push-url="true">{{ tag.name }}</a>{% endif %}{% empty %}<span class="no-tags">—</span>{% endfor %}{% if lead.tags.count > 2 %}<details class="tag-more"><summary>+{{ lead.tags.count|add:'-2' }}</summary><div class="tag-popover">{% for tag in lead.tags.all %}{% if forloop.counter > 2 %}<a class="tag-chip tag-color-{{ tag|tag_color }}" href="{{ tag.filter_url }}" hx-get="{{ tag.filter_url }}" hx-target="#inbox-content" hx-swap="innerHTML" hx-push-url="true">{{ tag.name }}</a>{% endif %}{% endfor %}</div></details>{% endif %}</div></td>
+        <td class="source-cell"><span class="source-badge source-{{ lead.source }}"><i aria-hidden="true"></i>{% if lead.source == 'bot' %}Telegram-бот{% elif lead.source == 'telegram' %}Telegram-аккаунт{% else %}Вручную{% endif %}</span></td>
+        <td class="status-cell"><span class="status-badge status-{{ lead.status }}"><i aria-hidden="true"></i>{{ lead.get_status_display }}</span></td>
+        <td class="created-cell"><time datetime="{{ lead.created_at|date:'c' }}" title="{{ lead.created_at|date:'j E Y г., H:i:s' }}">{{ lead.created_at|date:'d.m.Y' }}<small>{{ lead.created_at|date:'H:i' }}</small></time>{% if lead.is_demo %}<span class="demo-row-label">Демо</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="mobile-lead-list">
+  {% for lead in leads %}<article class="mobile-lead-card card {% if selected_id == lead.id|stringformat:'s' %}selected{% endif %}">
+    <div class="mobile-card-heading"><div><a class="client-link" href="{{ lead.open_url }}" hx-get="{{ lead.open_url }}" hx-target="#drawer-host" hx-swap="innerHTML" hx-push-url="true" aria-haspopup="dialog"><strong>{{ lead.name }}</strong><small>{{ lead.contact_value }}</small></a><span class="mobile-lead-number">Заявка №{{ lead.id }}</span></div><span class="status-badge status-{{ lead.status }}"><i aria-hidden="true"></i>{{ lead.get_status_display }}</span></div>
+    <p class="mobile-request">{{ lead.request }}</p>
+    <div class="mobile-card-meta"><span class="source-badge source-{{ lead.source }}"><i aria-hidden="true"></i>{% if lead.source == 'bot' %}Telegram-бот{% elif lead.source == 'telegram' %}Telegram-аккаунт{% else %}Вручную{% endif %}</span><time datetime="{{ lead.created_at|date:'c' }}" title="{{ lead.created_at|date:'j E Y г., H:i:s' }}">{{ lead.created_at|date:'d.m.Y H:i' }}</time></div>
+    <div class="mobile-card-tags">{% for tag in lead.tags.all %}<a class="tag-chip tag-color-{{ tag|tag_color }}" href="{{ tag.filter_url }}" hx-get="{{ tag.filter_url }}" hx-target="#inbox-content" hx-swap="innerHTML" hx-push-url="true">{{ tag.name }}</a>{% empty %}<span class="no-tags">Без тегов</span>{% endfor %}{% if lead.is_demo %}<span class="demo-row-label">Демо</span>{% endif %}</div>
+  </article>{% endfor %}
+</div>
+{% if leads.paginator.num_pages > 1 %}<nav class="pagination" aria-label="Страницы заявок">{% if leads.has_previous %}<a href="{{ prev_url }}" hx-get="{{ prev_url }}" hx-target="#inbox-content" hx-swap="innerHTML" hx-push-url="true">← Назад</a>{% endif %}<span>Страница {{ leads.number }} из {{ leads.paginator.num_pages }}</span>{% if leads.has_next %}<a href="{{ next_url }}" hx-get="{{ next_url }}" hx-target="#inbox-content" hx-swap="innerHTML" hx-push-url="true">Дальше →</a>{% endif %}</nav>{% endif %}
+{% else %}
+<section class="empty-state card"><span class="empty-symbol" aria-hidden="true">⌕</span><h2>{% if filters_active %}Заявки по этим условиям не найдены{% else %}Заявок пока нет{% endif %}</h2><p>{% if filters_active %}Уберите часть фильтров или начните заново.{% else %}Добавьте первое обращение вручную или настройте своего Telegram-бота.{% endif %}</p>{% if filters_active %}<a class="button btn button-secondary" href="{{ all_url }}" hx-get="{{ all_url }}" hx-target="#inbox-content" hx-swap="innerHTML" hx-push-url="true">Сбросить фильтры</a>{% else %}<a class="button btn btn-primary button-primary" href="{{ manual_url }}">Добавить заявку</a>{% endif %}</section>
+{% endif %}
