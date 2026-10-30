@@ -1,5 +1,11 @@
 # Public release checks
 
+## Interface screenshots 2026-10-30
+
+- Captured the actual Django funnel and inbox views in headless Chromium at 1600 × 1000 px. Both screens used a temporary, localhost-only preview server and a separate SQLite database populated by the unchanged fictional seed command.
+- The demo user had no usable password. Preview authentication existed only in the temporary screenshot server; no authentication bypass was added to application source or published.
+- Visually inspected both PNG files, confirmed that contacts use example.com, and embedded them in README. The temporary server and database were removed after capture. No live server or customer data was used.
+
 ## 2026-10-30
 
 - Prepared an independent source distribution using an explicit allowlist: Django config and app, migrations, tests, static assets with vendor notices, requirements, Docker files and generic documentation.
